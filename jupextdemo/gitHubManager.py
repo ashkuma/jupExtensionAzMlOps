@@ -8,6 +8,11 @@ class GithubManager():
     def _getNewToken(self):
         return self.patToken
 
+    def pushWorkFlow(self):
+        # 1 assume language as python
+        # assume we are in the same repo
+
+
     def commitDocker(self):
         pass
 

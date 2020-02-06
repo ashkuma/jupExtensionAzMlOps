@@ -68,6 +68,9 @@ class AKSDeploy():
     def getAKSDetails(self):
         return self.azResourceHelper.getAKSDetails(self.currentSubscription)
 
+    def getYamlTemplate(self):
+        return None;
+
 class AKSDeploy_ResourceHelper():
     def __init__(self):
         pass
