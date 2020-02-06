@@ -1,4 +1,5 @@
 from github import Github
+from .utlis import *
 
 class GithubManager():
     def __init__(self,patToken):
@@ -18,6 +19,21 @@ class GithubManager():
     def pushTestFile(self):
         pass
 
+    def cleanChartsFolder(self,repos):
+        allFiles = repos.get_contents("/charts")
+        for f in allFiles:
+            print(f.path)
+            values = repos.get_contents(f.path);
+            if not type(values) == list:
+                sha = values.sha
+                print(sha)
+                if f.path.startswith("charts"):
+                    repos.delete_file(
+                        path=f.path,
+                        message="Delete file for testDeleteFile",
+                        sha=sha,
+                        branch="master",
+                    )
 
     def commitDocker(self):
         pass
@@ -25,8 +41,21 @@ class GithubManager():
     def commitWorkflow(self):
         pass
 
-    def commitHelmCharts(self):
-        pass
+    def commitHelmCharts(self,repos):
+        files = getHelmCharts(None,None)
+        for f in files :
+            f = f.replace('\\','/')
+            newFile = f
+            if newFile == "charts":
+                continue
+            content = "Hello world".encode()
+            print(newFile)
+            repos.create_file(
+                path=newFile,
+                message="Create file for testCreateFile",
+                content="this is the file content",
+                branch="master",
+            )
 
     def commitPKLFile(self):
         pass

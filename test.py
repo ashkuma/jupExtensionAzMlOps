@@ -5,6 +5,9 @@ def _test_accounts():
     pass
 
 
+
+
+
 replyObject = {};
 if __name__ == "__main__":
     # #_test_accounts()
@@ -26,24 +29,12 @@ if __name__ == "__main__":
     # print(replyObject)
 
 
-    gm = GithubManager("e76551da10530f239c93038fa8902d97eec18ebc")
+    gm = GithubManager("")
     repos = list(gm.g.get_user().get_repos())[0]
     # print(repos)
     files = getHelmCharts(None,None)
-    allFiles = repos.get_contents("/")
-    for f in allFiles:
-        print(f.path)
-        values = repos.get_contents(f.path);
-        if not type(values) == list:
-            sha = values.sha
-            print(sha)
-            if f.path.startswith("charts"):
-                repos.delete_file(
-                    path=f.path,
-                    message="Delete file for testDeleteFile",
-                    sha=sha,
-                    branch="master",
-                )
+    print(files)
+    
         
 
     # # print(files)
@@ -57,18 +48,7 @@ if __name__ == "__main__":
     # )
 
 
-    # for f in files :
-    #     print(f.replace('\\','/'))
-    #     newFile = f
-    #     if newFile == "charts":
-    #         continue
-    #     content = "Hello world".encode()
-    #     repos.create_file(
-    #         path=newFile,
-    #         message="Create file for testCreateFile",
-    #         content="this is the file content",
-    #         branch="master",
-    #     )
+    
 
     
 

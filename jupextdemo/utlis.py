@@ -41,11 +41,13 @@ def getHelmCharts(acr_details,port):
         if "values.yaml" in name :
             file_content = get_file_content(name)
             print(name)
-        if name.startswith(languagePackPath):
+        if name.startswith(languagePackPath) and os.path.isfile(name):
             name = name[len(languagePackPath):]
+            files.append(name)
         else:
-            print(name + " doesn start with" + langfilesPaths)
-        files.append(name)
+            pass
+            #print(name + " doesn start with" + langfilesPaths)
+        
     return files
 
 
