@@ -10,7 +10,13 @@ class GithubManager():
 
     def pushWorkFlow(self):
         # 1 assume language as python
-        # assume we are in the same repo
+        # 2 assume we are in the same repo, from where is it invoking
+        # 3 assuming user already has docker file
+        # assuming helmCharts and 
+        pass
+
+    def pushTestFile(self):
+        pass
 
 
     def commitDocker(self):
