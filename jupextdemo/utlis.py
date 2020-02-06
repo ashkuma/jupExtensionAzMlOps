@@ -90,8 +90,6 @@ def getUserSubscriptionsList():
     print(s)
 
 
-print(getHelmCharts(None,None))
-
 
 
 
