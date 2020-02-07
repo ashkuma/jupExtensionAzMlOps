@@ -81,20 +81,3 @@ def get_git_remotes():
         if len(components) == 3:
             _git_remotes[components[0] + components[2]] = components[1]
     return _git_remotes
-
-
-def get_yaml_template_for_repo(cluster_details, acr_details, repo_name):
-    files_to_return = []
-    github_workflow_path = '.github/workflows/'
-    # Read template file
-    yaml_file_name = 'main.yml'
-    workflow_yaml = github_workflow_path + yaml_file_name
-    from resources.resourcefiles import DEPLOY_TO_AKS_TEMPLATE
-    files_to_return.append(Files(path=workflow_yaml,
-                                 content=DEPLOY_TO_AKS_TEMPLATE
-                                 .replace(APP_NAME_PLACEHOLDER, APP_NAME_DEFAULT)
-                                 .replace(ACR_PLACEHOLDER, acr_details['name'])
-                                 .replace(CLUSTER_PLACEHOLDER, cluster_details['name'])
-                                 .replace(RELEASE_PLACEHOLDER, RELEASE_NAME)
-                                 .replace(RG_PLACEHOLDER, cluster_details['resourceGroup'])))
-    return files_to_return

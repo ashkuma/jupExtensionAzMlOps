@@ -1,5 +1,5 @@
 from github import Github, GithubException
-from .utlis import *
+from .utils import *
 from .githubHelper import *
 
 
@@ -72,22 +72,34 @@ class GithubManager():
             False
 
     def workFlowFileExists(self, repo):
-        pass
+        allFiles = None
+        try:
+            allFiles = repo.get_contents("/.github/workflows")
+        except GithubException as ex:
+            print(ex)
+            allFiles = None
+
+        if allFiles != None and len(allFiles) > 0:
+            print("Workflows already exist")
+            return True
+        else:
+            print("Workflows don't exists")
+            return False
 
     def pushWorkFlow(self, repo, cluster_details, acr_details):
         workflow_files = get_yaml_template_for_repo(
             cluster_details, acr_details, repo.name)
-        print("workflow pushed to repo for ")
+        print("workflow pushed to repo for %s" % (repo.name))
+        print(cluster_details)
         for single_file in workflow_files:
-            print("file path: %s", single_file.path)
-            print("file content: %s", single_file.content)
+            print("file path: %s" % (single_file.path))
+            print("file content: %s" % (single_file.content))
             repo.create_file(
                 path=single_file.path,
                 message="Create workflows",
                 content=single_file.content,
                 branch="master",
             )
-        print(cluster_details)
         pass
 
     def cleanChartsFolder(self, repos):
