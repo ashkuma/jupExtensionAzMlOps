@@ -10,31 +10,30 @@ def _test_accounts():
 
 replyObject = {};
 if __name__ == "__main__":
-    # #_test_accounts()
-    # #isValidRepoForPat()
-    # aks_dep = AKSDeploy();
-    # if aks_dep.IsUserLoggedIn() :
-    #     replyObject["DefaultSubscription"] = aks_dep.getDefaultSubscription()
-    # else:
-    #     aks_dep.loginUserFlow()
-    #     replyObject["DefaultSubscription"] = aks_dep.getDefaultSubscription() 
+    # STEP 1 : take the AKS and ACR details
+    # STEP 2 : Configure the Workflow files if they don't exist
+    # STEP 3:  Check-In the Workflow files to Github Repo
 
-    # # get ACR details
-    # replyObject["ACRAccount"] = aks_dep.getACRDetails()
+    aks_dep = AKSDeploy();
+    if aks_dep.IsUserLoggedIn() :
+        replyObject["DefaultSubscription"] = aks_dep.getDefaultSubscription()
+    else:
+        aks_dep.loginUserFlow()
+        replyObject["DefaultSubscription"] = aks_dep.getDefaultSubscription() 
 
-    # # get AKS details
-    # replyObject["AKSCluster"] =  aks_dep.getAKSDetails()
+    # get ACR details
+    replyObject["ACRAccount"] = aks_dep.getACRDetails()
+
+    # get AKS details
+    replyObject["AKSCluster"] =  aks_dep.getAKSDetails()
     
 
     # print(replyObject)
 
+    # now use this object and pass it to Github manager to implement 
 
     gm = GithubManager("")
-    repos = list(gm.g.get_user().get_repos())[0]
-    # print(repos)
-    files = getHelmCharts(None,None)
-    print(files)
-    
+    gm.pushDeployFilestoRepo(replyObject["AKSCluster"],replyObject["ACRAccount"])
         
 
     # # print(files)

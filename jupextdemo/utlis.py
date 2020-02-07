@@ -51,6 +51,24 @@ def getHelmCharts(acr_details,port):
     return files
 
 
+def get_yaml_template_for_repo(cluster_details, acr_details, repo_name):
+    files_to_return = []
+    # github_workflow_path = '.github/workflows/'
+    # # Read template file
+    # yaml_file_name = 'main.yml'
+    # workflow_yaml = github_workflow_path + yaml_file_name
+    # if check_file_exists(repo_name, workflow_yaml):
+    #     yaml_file_name = get_new_workflow_yaml_name()
+    #     workflow_yaml = github_workflow_path + yaml_file_name
+    # from azext_aks_deploy.dev.resources.resourcefiles import DEPLOY_TO_AKS_TEMPLATE
+    # files_to_return.append(Files(path=workflow_yaml,
+    #                              content=DEPLOY_TO_AKS_TEMPLATE
+    #                              .replace(APP_NAME_PLACEHOLDER, APP_NAME_DEFAULT)
+    #                              .replace(ACR_PLACEHOLDER, acr_details['name'])
+    #                              .replace(CLUSTER_PLACEHOLDER, cluster_details['name'])
+    #                              .replace(RELEASE_PLACEHOLDER, RELEASE_NAME)
+    #                              .replace(RG_PLACEHOLDER, cluster_details['resourceGroup'])))
+    return files_to_return
 
 
 def getLanguagePackPath():

@@ -1,7 +1,5 @@
 import requests
 import json
-from github import Github
-from .gitHubManager import GithubManager
 
 try:
     from urllib.parse import urlparse
@@ -14,12 +12,7 @@ _GIT_EXE = 'git'
 
 def isValidRepoForPat():
     # get url from local repo
-    localUrls = get_git_remotes();
-    x=None
-    if localUrls != None:
-        print(localUrls)
-        x = localUrls["origin(fetch)"]
-        is_github_url_candidate(x);
+    
     print(" now using the PAT to verify this local directory is in the same account as for which PAT is generated")
     gm = GithubManager("<PAT TOKEN>")
     for repo in gm. g.get_user().get_repos():
@@ -27,7 +20,16 @@ def isValidRepoForPat():
             print(" both urls are same ");
         else:
             print("PAT is not valid for this repository")
+
+def getLocalRepoUrl():
+    localUrls = get_git_remotes();
+    x=None
+    if localUrls != None:
+        print(localUrls)
+        x = localUrls["origin(fetch)"]
         
+    return x if is_github_url_candidate(x) else None;
+
         
 def compareUrls(uri1 , uri2):
     if (uri1 == None and uri2 != None) or (uri1 != None and uri2 == None) or  (uri1 == None and uri2 == None):
@@ -53,11 +55,6 @@ def is_github_url_candidate(url):
     if components.netloc == 'github.com':
         return True
     return False
-
-def getCurrentRepositoryfromLocal():
-    pass
-
-
 
 def get_git_remotes():
     import subprocess
