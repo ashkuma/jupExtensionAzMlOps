@@ -33,7 +33,9 @@ if __name__ == "__main__":
     # now use this object and pass it to Github manager to implement 
 
     gm = GithubManager("")
-    gm.pushDeployFilestoRepo(replyObject["AKSCluster"],replyObject["ACRAccount"])
+    akscluster = replyObject["AKSCluster"][0] if len(replyObject["AKSCluster"])> 0 else None;
+    acrAccount = replyObject["ACRAccount"][0] if len(replyObject["ACRAccount"])> 0 else None;
+    gm.pushDeployFilestoRepo(akscluster,acrAccount)
         
 
     # # print(files)

@@ -10,17 +10,6 @@ _git_remotes = {}
 _GIT_EXE = 'git'
 
 
-def isValidRepoForPat():
-    # get url from local repo
-    
-    print(" now using the PAT to verify this local directory is in the same account as for which PAT is generated")
-    gm = GithubManager("<PAT TOKEN>")
-    for repo in gm. g.get_user().get_repos():
-        if compareUrls(x,repo.clone_url):
-            print(" both urls are same ");
-        else:
-            print("PAT is not valid for this repository")
-
 def getLocalRepoUrl():
     localUrls = get_git_remotes();
     x=None

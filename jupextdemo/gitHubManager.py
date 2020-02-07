@@ -1,4 +1,4 @@
-from github import Github
+from github import Github,GithubException
 from .utlis import *
 from .githubHelper import *
 
@@ -19,11 +19,11 @@ class GithubManager():
         # assuming helmCharts and 
         repo = self.getRepo()
         if repo == None:
-            print("PAT entered is not for the correct owner if this repository. Make sure you are in the repository and notebook is opened from that repo only. ")
+            print("PAT entered is not for the correct owner of this repository. Make sure you are in the repository and notebook is opened from that repo only. ")
             return
         print(repo.name)
         if not self.chartsExist(repo):
-            self.pushCharts(repo, acr_details, 5000)
+            self.pushCharts(repo, acr_details, "5000")
 
         if not self.workFlowFileExists(repo):
             self.pushWorkFlow(repo,cluster_details, acr_details)
@@ -42,13 +42,35 @@ class GithubManager():
     def pushTestFile(self):
         pass
 
-    def pushCharts(self,repo, acr_details, port=5000):
+    def pushCharts(self,repo, acr_details, port="5000"):
         print("charts pushed to repo for ")
-        print(acr_details)
-        pass
+        files = getHelmCharts(acr_details,port)
+
+        for f in files :
+            newFile = f.path
+            content = f.content
+            print(newFile)
+            repo.create_file(
+                path=newFile,
+                message="Create file charts",
+                content=content,
+                branch="master",
+            )
 
     def chartsExist(self,repo):
-        pass
+        allFiles = None
+        try:
+            allFiles = repo.get_contents("/charts")
+        except GithubException as ex:
+            print(ex)
+            allFiles = None
+
+        if allFiles != None and len(allFiles)>0:
+            print("Charts already exist")
+            return True
+        else:
+            print("Charts don't exists")
+            False
 
     def workFlowFileExists(self,repo):
         pass
@@ -59,6 +81,7 @@ class GithubManager():
         pass
 
     def cleanChartsFolder(self,repos):
+        print(" cleaning up charts folder")
         allFiles = repos.get_contents("/charts")
         for f in allFiles:
             print(f.path)
@@ -67,6 +90,21 @@ class GithubManager():
                 sha = values.sha
                 print(sha)
                 if f.path.startswith("charts"):
+                    repos.delete_file(
+                        path=f.path,
+                        message="Delete file for testDeleteFile",
+                        sha=sha,
+                        branch="master",
+                    )
+
+        allFiles = repos.get_contents("/charts/templates")
+        for f in allFiles:
+            print(f.path)
+            values = repos.get_contents(f.path);
+            if not type(values) == list:
+                sha = values.sha
+                if f.path.startswith("charts"):
+                    print("deleting templates")
                     repos.delete_file(
                         path=f.path,
                         message="Delete file for testDeleteFile",

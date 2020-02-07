@@ -25,7 +25,10 @@ BASE_DIR = abspath(dirname(dirname(abspath(__file__))))
 PACKS_ROOT_STRING = os.path.sep + 'resources' + os.path.sep + 'packs' + os.path.sep
 FILE_ABSOLUTE_PATH = abspath(dirname(dirname(abspath(__file__))))
 
-
+class Files:  # pylint: disable=too-few-public-methods
+    def __init__(self, path, content):
+        self.path = path
+        self.content = content
 
 
 def getHelmCharts(acr_details,port):
@@ -36,18 +39,19 @@ def getHelmCharts(acr_details,port):
     langfilesPaths = testglob(languagePackPath)
     #print(langfilesPaths)
     for name in langfilesPaths :
+        if not os.path.isfile(name):
+            continue
         if "charts" not in name:
             continue
+        file_content = get_file_content(name)
         if "values.yaml" in name :
-            file_content = get_file_content(name)
-            print(name)
-        if name.startswith(languagePackPath) and os.path.isfile(name):
+            file_content = replace_values(file_content, acr_details)
+            file_content = replace_port(file_content, port)
+        if name.startswith(languagePackPath):
             name = name[len(languagePackPath):]
-            files.append(name)
-        else:
-            pass
-            #print(name + " doesn start with" + langfilesPaths)
-        
+            name = name.replace('\\', '/')
+
+            files.append(Files(path=name, content=file_content))
     return files
 
 
@@ -83,7 +87,9 @@ def testglob(langpath):
 
 
 def replace_values(file_content, acr_details):
-    content = file_content.replace(APP_NAME_PLACEHOLDER, APP_NAME_DEFAULT).replace(ACR_PLACEHOLDER, acr_details['name'])
+    print(acr_details)
+    acr_name = acr_details['name'] if (acr_details != None and "name" in acr_details) else APP_NAME_DEFAULT;
+    content = file_content.replace(APP_NAME_PLACEHOLDER, APP_NAME_DEFAULT).replace(ACR_PLACEHOLDER, acr_name)
     return content
 
 
