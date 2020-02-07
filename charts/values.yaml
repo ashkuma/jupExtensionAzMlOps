@@ -1,1 +1,24 @@
-this is the file content
+# Default values for python.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+replicaCount: 1
+image:
+  repository: ashkumamachi44e5eefe.azurecr.io/k8sdemo
+  tag: ${{ github.sha }}
+  pullPolicy: IfNotPresent
+nameOverride: "python"
+fullnameOverride: "python"
+service:
+  name: python
+  type: LoadBalancer
+  externalPort: 5000
+  internalPort: 5000
+resources:
+  limits:
+    cpu: 100m
+    memory: 128Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+ingress:
+  enabled: false
