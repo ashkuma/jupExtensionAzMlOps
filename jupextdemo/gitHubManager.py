@@ -1,22 +1,21 @@
-from github import Github,GithubException
+from github import Github, GithubException
 from .utlis import *
 from .githubHelper import *
 
 
 class GithubManager():
-    def __init__(self,patToken):
-        self.patToken = patToken;
-        self.g = Github(self.patToken);
+    def __init__(self, patToken):
+        self.patToken = patToken
+        self.g = Github(self.patToken)
 
     def _getNewToken(self):
         return self.patToken
 
-
-    def pushDeployFilestoRepo(self,cluster_details, acr_details):
+    def pushDeployFilestoRepo(self, cluster_details, acr_details):
         # 1 assume language as python
         # 2 assume we are in the same repo, from where is it invoking
         # 3 assuming user already has docker file
-        # assuming helmCharts and 
+        # assuming helmCharts and
         repo = self.getRepo()
         if repo == None:
             print("PAT entered is not for the correct owner of this repository. Make sure you are in the repository and notebook is opened from that repo only. ")
@@ -26,7 +25,7 @@ class GithubManager():
             self.pushCharts(repo, acr_details, "5000")
 
         if not self.workFlowFileExists(repo):
-            self.pushWorkFlow(repo,cluster_details, acr_details)
+            self.pushWorkFlow(repo, cluster_details, acr_details)
 
         pass
 
@@ -34,19 +33,19 @@ class GithubManager():
         # TODO : check if this works when i am in any branch as well
         x = getLocalRepoUrl()
         for repo in self. g.get_user().get_repos():
-            if compareUrls(x,repo.clone_url):
+            if compareUrls(x, repo.clone_url):
                 return repo
-            
+
         return None
-                
+
     def pushTestFile(self):
         pass
 
-    def pushCharts(self,repo, acr_details, port="5000"):
+    def pushCharts(self, repo, acr_details, port="5000"):
         print("charts pushed to repo for ")
-        files = getHelmCharts(acr_details,port)
+        files = getHelmCharts(acr_details, port)
 
-        for f in files :
+        for f in files:
             newFile = f.path
             content = f.content
             print(newFile)
@@ -57,7 +56,7 @@ class GithubManager():
                 branch="master",
             )
 
-    def chartsExist(self,repo):
+    def chartsExist(self, repo):
         allFiles = None
         try:
             allFiles = repo.get_contents("/charts")
@@ -65,27 +64,38 @@ class GithubManager():
             print(ex)
             allFiles = None
 
-        if allFiles != None and len(allFiles)>0:
+        if allFiles != None and len(allFiles) > 0:
             print("Charts already exist")
             return True
         else:
             print("Charts don't exists")
             False
 
-    def workFlowFileExists(self,repo):
+    def workFlowFileExists(self, repo):
         pass
 
-    def pushWorkFlow(self,repo,cluster_details, acr_details):
+    def pushWorkFlow(self, repo, cluster_details, acr_details):
+        workflow_files = get_yaml_template_for_repo(
+            cluster_details, acr_details, repo.name)
         print("workflow pushed to repo for ")
+        for single_file in workflow_files:
+            print("file path: %s", single_file.path)
+            print("file content: %s", single_file.content)
+            repo.create_file(
+                path=single_file.path,
+                message="Create workflows",
+                content=single_file.content,
+                branch="master",
+            )
         print(cluster_details)
         pass
 
-    def cleanChartsFolder(self,repos):
+    def cleanChartsFolder(self, repos):
         print(" cleaning up charts folder")
         allFiles = repos.get_contents("/charts")
         for f in allFiles:
             print(f.path)
-            values = repos.get_contents(f.path);
+            values = repos.get_contents(f.path)
             if not type(values) == list:
                 sha = values.sha
                 print(sha)
@@ -100,7 +110,7 @@ class GithubManager():
         allFiles = repos.get_contents("/charts/templates")
         for f in allFiles:
             print(f.path)
-            values = repos.get_contents(f.path);
+            values = repos.get_contents(f.path)
             if not type(values) == list:
                 sha = values.sha
                 if f.path.startswith("charts"):
@@ -112,10 +122,10 @@ class GithubManager():
                         branch="master",
                     )
 
-    def commitHelmCharts(self,repos):
-        files = getHelmCharts(None,None)
-        for f in files :
-            f = f.replace('\\','/')
+    def commitHelmCharts(self, repos):
+        files = getHelmCharts(None, None)
+        for f in files:
+            f = f.replace('\\', '/')
             newFile = f
             if newFile == "charts":
                 continue
@@ -133,6 +143,3 @@ class GithubManager():
 
     def commitAppFile(self):
         pass
-
-
-    

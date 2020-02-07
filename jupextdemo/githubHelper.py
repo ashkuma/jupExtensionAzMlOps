@@ -5,36 +5,45 @@ try:
     from urllib.parse import urlparse
 except ImportError:
     from urlparse import urlparse
+from jupextdemo.const import (CHECKIN_MESSAGE_AKS, APP_NAME_DEFAULT, APP_NAME_PLACEHOLDER,
+                              ACR_PLACEHOLDER, RG_PLACEHOLDER, PORT_NUMBER_DEFAULT,
+                              CLUSTER_PLACEHOLDER, RELEASE_PLACEHOLDER, RELEASE_NAME)
 
 _git_remotes = {}
 _GIT_EXE = 'git'
 
 
+class Files:  # pylint: disable=too-few-public-methods
+    def __init__(self, path, content):
+        self.path = path
+        self.content = content
+
+
 def getLocalRepoUrl():
-    localUrls = get_git_remotes();
-    x=None
+    localUrls = get_git_remotes()
+    x = None
     if localUrls != None:
         print(localUrls)
         x = localUrls["origin(fetch)"]
-        
-    return x if is_github_url_candidate(x) else None;
 
-        
-def compareUrls(uri1 , uri2):
-    if (uri1 == None and uri2 != None) or (uri1 != None and uri2 == None) or  (uri1 == None and uri2 == None):
+    return x if is_github_url_candidate(x) else None
+
+
+def compareUrls(uri1, uri2):
+    if (uri1 == None and uri2 != None) or (uri1 != None and uri2 == None) or (uri1 == None and uri2 == None):
         return False
-    
+
     components1 = uri_parse(uri1.lower())
     components2 = uri_parse(uri2.lower())
 
     if (components1.netloc == "github.com" and components1.netloc == components2.netloc) and components2.path == components1.path:
-        return True;
+        return True
     else:
         return False
 
 
 def uri_parse(url):
-    return urlparse(url)     
+    return urlparse(url)
 
 
 def is_github_url_candidate(url):
@@ -44,6 +53,7 @@ def is_github_url_candidate(url):
     if components.netloc == 'github.com':
         return True
     return False
+
 
 def get_git_remotes():
     import subprocess
@@ -57,7 +67,8 @@ def get_git_remotes():
         # full  https://mseng.visualstudio.com/DefaultCollection/VSOnline/_git/_full/VSO (push)
         # origin  https://mseng.visualstudio.com/defaultcollection/VSOnline/_git/VSO (fetch)
         # origin  https://mseng.visualstudio.com/defaultcollection/VSOnline/_git/VSO (push)
-        output = subprocess.check_output([_GIT_EXE, 'remote', '-v'], stderr=subprocess.STDOUT)
+        output = subprocess.check_output(
+            [_GIT_EXE, 'remote', '-v'], stderr=subprocess.STDOUT)
     except BaseException as ex:  # pylint: disable=broad-except
         print("Not a repo")
         return None
@@ -72,4 +83,18 @@ def get_git_remotes():
     return _git_remotes
 
 
-    
+def get_yaml_template_for_repo(cluster_details, acr_details, repo_name):
+    files_to_return = []
+    github_workflow_path = '.github/workflows/'
+    # Read template file
+    yaml_file_name = 'main.yml'
+    workflow_yaml = github_workflow_path + yaml_file_name
+    from resources.resourcefiles import DEPLOY_TO_AKS_TEMPLATE
+    files_to_return.append(Files(path=workflow_yaml,
+                                 content=DEPLOY_TO_AKS_TEMPLATE
+                                 .replace(APP_NAME_PLACEHOLDER, APP_NAME_DEFAULT)
+                                 .replace(ACR_PLACEHOLDER, acr_details['name'])
+                                 .replace(CLUSTER_PLACEHOLDER, cluster_details['name'])
+                                 .replace(RELEASE_PLACEHOLDER, RELEASE_NAME)
+                                 .replace(RG_PLACEHOLDER, cluster_details['resourceGroup'])))
+    return files_to_return
