@@ -81,14 +81,18 @@ class AKSDeploy_ResourceHelper():
 
     def getACRDetails(self,subscription):
         acr_list = subprocess.check_output('az acr list --subscription {subscription} -o json'.format(subscription=subscription), shell=True)
-        acr_list = json.loads(acr_list)
-        return acr_list
+        acr_list_json = json.loads(acr_list)
+        return acr_list_json
 
     def getAKSDetails(self,subscription):
         aks_list = subprocess.check_output('az aks list --subscription {subscription} -o json'.format(subscription=subscription), shell=True)
-        aks_list = json.loads(aks_list)
-        return aks_list
-
+        aks_list_json = json.loads(aks_list)
+        return aks_list_json
+        
+    def createAzureCredentials(self):
+        auth_details = subprocess.check_output('az ad sp create-for-rbac --sdk-auth -o json', shell=True)
+        auth_details_json = json.loads(auth_details)
+        return auth_details_json
 
 class AKSDeploy_ResourceCreator():
     def __init__(self):

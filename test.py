@@ -1,7 +1,6 @@
 from jupextdemo.utils import *
-from jupextdemo.githubHelper import *
 from jupextdemo.azaks_deploy import *
-
+from jupextdemo.gitHubManager import GithubManager
 
 def _test_accounts():
     pass
@@ -30,7 +29,7 @@ if __name__ == "__main__":
 
     # now use this object and pass it to Github manager to implement
 
-    gm = GithubManager()
+    gm = GithubManager("")
     akscluster = replyObject["AKSCluster"][0] if len(
         replyObject["AKSCluster"]) > 0 else None
     acrAccount = replyObject["ACRAccount"][0] if len(
