@@ -7,6 +7,7 @@ class GithubManager():
     def __init__(self, patToken):
         self.patToken = patToken
         self.g = Github(self.patToken)
+        self.repo = None
 
     def _getNewToken(self):
         return self.patToken
@@ -17,6 +18,7 @@ class GithubManager():
         # 3 assuming user already has docker file
         # assuming helmCharts and
         repo = self.getRepo()
+        returnCommit = None
         if repo == None:
             print("PAT entered is not for the correct owner of this repository. Make sure you are in the repository and notebook is opened from that repo only. ")
             return
@@ -25,15 +27,18 @@ class GithubManager():
             self.pushCharts(repo, acr_details, "5000")
 
         if not self.workFlowFileExists(repo):
-            self.pushWorkFlow(repo, cluster_details, acr_details)
+            returnCommit = self.pushWorkFlow(
+                repo, cluster_details, acr_details)
 
-        pass
+        # return this sha for commit so it can be tracked.
+        return returnCommit.sha
 
     def getRepo(self):
         # TODO : check if this works when i am in any branch as well
         x = getLocalRepoUrl()
         for repo in self. g.get_user().get_repos():
             if compareUrls(x, repo.clone_url):
+                self.repo = repo
                 return repo
 
         return None
@@ -90,15 +95,18 @@ class GithubManager():
         workflow_files = get_yaml_template_for_repo(
             cluster_details, acr_details, repo.name)
         print("workflow pushed to repo for %s" % (repo.name))
+        print(cluster_details)
+        returnCommit = None
         for single_file in workflow_files:
             print("file path: %s" % (single_file.path))
             print("file content: %s" % (single_file.content))
-            repo.create_file(
+            returnCommit = repo.create_file(
                 path=single_file.path,
                 message="Create workflows",
                 content=single_file.content,
                 branch="master",
             )
+        return returnCommit
 
     def cleanChartsFolder(self, repos):
         print(" cleaning up charts folder")
@@ -152,4 +160,25 @@ class GithubManager():
         pass
 
     def commitAppFile(self):
+        pass
+
+    def getWorkflowStatus(self, commit_sha):
+        repo = self.getRepo()
+        check_run_id = get_work_flow_check_runID(
+            repo.name, repo.owner.login, commit_sha, self.patToken)
+        print(check_run_id)
+        workflow_url = 'https://github.com/{repo_id}/runs/{checkID}'.format(repo_id=repo.name,
+                                                                            checkID=check_run_id)
+        print('GitHub Action workflow has been created - {}'.format(workflow_url))
+
+        check_run_status, check_run_conclusion = poll_workflow_status(
+            repo.name, repo.owner.login, check_run_id, self.patToken)
+
+        print(" workflow completed : ")
+        print("check_run_status " + str(check_run_status))
+        print("check_run_conclusion " + str(check_run_conclusion))
+
+        # configure_aks_credentials(cluster_details['name'], cluster_details['resourceGroup'])
+        # deployment_ip, port = get_deployment_IP_port(RELEASE_NAME, language)
+        # print('Your app is deployed at: http://{ip}:{port}'.format(ip=deployment_ip, port=port))
         pass
