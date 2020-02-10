@@ -42,9 +42,8 @@ class GithubManager():
         pass
 
     def pushCharts(self, repo, acr_details, port="5000"):
-        print("charts pushed to repo for ")
         files = getHelmCharts(acr_details, port)
-
+        print("helm charts count %s" % len(files))
         for f in files:
             newFile = f.path
             content = f.content
@@ -55,6 +54,7 @@ class GithubManager():
                 content=content,
                 branch="master",
             )
+        print("charts pushed to repo for ")
 
     def chartsExist(self, repo):
         allFiles = None
@@ -90,7 +90,6 @@ class GithubManager():
         workflow_files = get_yaml_template_for_repo(
             cluster_details, acr_details, repo.name)
         print("workflow pushed to repo for %s" % (repo.name))
-        print(cluster_details)
         for single_file in workflow_files:
             print("file path: %s" % (single_file.path))
             print("file content: %s" % (single_file.content))
@@ -100,7 +99,6 @@ class GithubManager():
                 content=single_file.content,
                 branch="master",
             )
-        pass
 
     def cleanChartsFolder(self, repos):
         print(" cleaning up charts folder")
