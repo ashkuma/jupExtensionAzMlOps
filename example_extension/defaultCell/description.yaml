@@ -1,0 +1,24 @@
+Type: Jupyter Notebook Extension
+Compatibility: 3.x, 4.x, 5.x, 6.x
+Name: Azure Devops Extensions
+Main: main.js
+Link: README.md
+Description: |
+      allows to configure github workflow to deploy app on aks cluster on each commit
+Parameters:
+- name: deployLocally
+  description: Deploy Locally to docker
+  input_type: checkbox
+  default: true
+- name: gitHubPatToken
+  description: git hub pat token for repository
+  input_type: string
+  default: ""
+- name: AzureContainerName
+  description: container name where image will be deployed
+  input_type: string
+  default: ""
+- name: AzureAKSName
+  description: path to aks cluster 
+  input_type: string
+  default:  ""

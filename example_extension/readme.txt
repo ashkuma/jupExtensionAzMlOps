@@ -1,0 +1,1 @@
+copy this folder to the extension for for jupyter notebook and install again. 
