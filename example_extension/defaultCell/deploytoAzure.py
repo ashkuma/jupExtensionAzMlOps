@@ -10,14 +10,13 @@ from IPython.core.magics.namespace import NamespaceMagics
 from jupextdemo.gitHubManager import GithubManager
 
 DeploymentObject = {
-    "acrDetails" : "ACRPLACEHOLDER",
-    "aksDetails" : "AKSPLACEHOLDER",
-    "githubPatToken" : "GITHUBPATTOKEN"
+    "acrName": "ACRPLACEHOLDER",
+    "aksName": "AKSNAMEPLACEHOLDER",
+    "aksResourceGroup": "AKSRESOURCEGROUPPLACEHOLDER",
+    "githubPatToken": "GITHUBPATTOKEN"
 }
 
-print(DeploymentObject)
+gm = GithubManager(DeploymentObject["githubPatToken"])
 
-
-print(GithubManager(DeploymentObject["githubPatToken"]).getRepo())
-
-
+gm.pushDeployFilestoRepo(
+    {"name": DeploymentObject["aksName"], "resourceGroup": DeploymentObject["aksResourceGroup"]}, {"name": DeploymentObject["acrName"]})

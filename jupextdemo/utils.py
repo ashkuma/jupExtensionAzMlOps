@@ -35,11 +35,8 @@ class Files:  # pylint: disable=too-few-public-methods
 
 def getHelmCharts(acr_details, port):
     languagePackPath = getLanguagePackPath()
-    print(languagePackPath)
-    print(" ")
     files = []
     langfilesPaths = testglob(languagePackPath)
-    print(langfilesPaths)
     for name in langfilesPaths:
         if not os.path.isfile(name):
             continue
@@ -91,7 +88,7 @@ def get_docker_templates(language, port):
     docker_ignore = Files(path=docker_ignore_path,
                           content=docker_ignore_content)
     print("Checkin file path: %s" % (docker_ignore.path))
-    logger.debug("Checkin file content: %s" % (docker_ignore.content))
+    print("Checkin file content: %s" % (docker_ignore.content))
     files.append(docker_ignore)
     return files
 

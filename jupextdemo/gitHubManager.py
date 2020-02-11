@@ -22,16 +22,14 @@ class GithubManager():
         if repo == None:
             print("PAT entered is not for the correct owner of this repository. Make sure you are in the repository and notebook is opened from that repo only. ")
             return
-        print(repo.name)
         if not self.chartsExist(repo):
             self.pushCharts(repo, acr_details, "5000")
 
         if not self.workFlowFileExists(repo):
             returnCommit = self.pushWorkFlow(
                 repo, cluster_details, acr_details)
-
-        # return this sha for commit so it can be tracked.
-        return returnCommit.sha
+            print(returnCommit['commit'].sha)
+            self.getWorkflowStatus(returnCommit['commit'].sha)
 
     def getRepo(self):
         # TODO : check if this works when i am in any branch as well
@@ -48,11 +46,9 @@ class GithubManager():
 
     def pushCharts(self, repo, acr_details, port="5000"):
         files = getHelmCharts(acr_details, port)
-        print("helm charts count %s" % len(files))
         for f in files:
             newFile = f.path
             content = f.content
-            print(newFile)
             repo.create_file(
                 path=newFile,
                 message="Create file charts",
@@ -95,7 +91,6 @@ class GithubManager():
         workflow_files = get_yaml_template_for_repo(
             cluster_details, acr_details, repo.name)
         print("workflow pushed to repo for %s" % (repo.name))
-        print(cluster_details)
         returnCommit = None
         for single_file in workflow_files:
             print("file path: %s" % (single_file.path))
@@ -112,7 +107,6 @@ class GithubManager():
         print(" cleaning up charts folder")
         allFiles = repos.get_contents("/charts")
         for f in allFiles:
-            print(f.path)
             values = repos.get_contents(f.path)
             if not type(values) == list:
                 sha = values.sha
@@ -127,7 +121,6 @@ class GithubManager():
 
         allFiles = repos.get_contents("/charts/templates")
         for f in allFiles:
-            print(f.path)
             values = repos.get_contents(f.path)
             if not type(values) == list:
                 sha = values.sha
