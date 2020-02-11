@@ -158,6 +158,8 @@ class GithubManager():
         pass
 
     def commitAppFile(self):
+        # get the app path, then scan the file and then update it .
+        
         pass
 
     def getWorkflowStatus(self, commit_sha):
