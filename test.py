@@ -2,6 +2,7 @@ from jupextdemo.utils import *
 from jupextdemo.azaks_deploy import *
 from jupextdemo.gitHubManager import GithubManager
 
+
 def _test_accounts():
     pass
 

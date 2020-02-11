@@ -8,6 +8,7 @@ class GithubManager():
         self.patToken = patToken
         self.g = Github(self.patToken)
         self.repo = None
+
     def _getNewToken(self):
         return self.patToken
 
@@ -26,7 +27,8 @@ class GithubManager():
             self.pushCharts(repo, acr_details, "5000")
 
         if not self.workFlowFileExists(repo):
-            returnCommit = self.pushWorkFlow(repo, cluster_details, acr_details)
+            returnCommit = self.pushWorkFlow(
+                repo, cluster_details, acr_details)
 
         # return this sha for commit so it can be tracked.
         return returnCommit.sha
@@ -45,9 +47,8 @@ class GithubManager():
         pass
 
     def pushCharts(self, repo, acr_details, port="5000"):
-        print("charts pushed to repo for ")
         files = getHelmCharts(acr_details, port)
-
+        print("helm charts count %s" % len(files))
         for f in files:
             newFile = f.path
             content = f.content
@@ -58,6 +59,7 @@ class GithubManager():
                 content=content,
                 branch="master",
             )
+        print("charts pushed to repo for ")
 
     def chartsExist(self, repo):
         allFiles = None
@@ -104,7 +106,7 @@ class GithubManager():
                 content=single_file.content,
                 branch="master",
             )
-        return returnCommit;
+        return returnCommit
 
     def cleanChartsFolder(self, repos):
         print(" cleaning up charts folder")
@@ -164,13 +166,15 @@ class GithubManager():
 
     def getWorkflowStatus(self, commit_sha):
         repo = self.getRepo()
-        check_run_id = get_work_flow_check_runID(repo.name, repo.owner.login, commit_sha, self.patToken)
-        print(check_run_id)     
+        check_run_id = get_work_flow_check_runID(
+            repo.name, repo.owner.login, commit_sha, self.patToken)
+        print(check_run_id)
         workflow_url = 'https://github.com/{repo_id}/runs/{checkID}'.format(repo_id=repo.name,
                                                                             checkID=check_run_id)
         print('GitHub Action workflow has been created - {}'.format(workflow_url))
 
-        check_run_status, check_run_conclusion = poll_workflow_status(repo.name,repo.owner.login, check_run_id, self.patToken)
+        check_run_status, check_run_conclusion = poll_workflow_status(
+            repo.name, repo.owner.login, check_run_id, self.patToken)
 
         print(" workflow completed : ")
         print("check_run_status " + str(check_run_status))

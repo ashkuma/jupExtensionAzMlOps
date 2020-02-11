@@ -39,7 +39,7 @@ def getHelmCharts(acr_details, port):
     print(" ")
     files = []
     langfilesPaths = testglob(languagePackPath)
-    # print(langfilesPaths)
+    print(langfilesPaths)
     for name in langfilesPaths:
         if not os.path.isfile(name):
             continue
@@ -97,7 +97,6 @@ def get_docker_templates(language, port):
 
 
 def getLanguagePackPath():
-
     return BASE_DIR + os.path.sep + PACKS_ROOT_STRING + "python" + os.path.sep
 
 
