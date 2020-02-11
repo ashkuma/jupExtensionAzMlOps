@@ -140,29 +140,19 @@ class GithubManager():
                         branch="master",
                     )
 
-    def commitHelmCharts(self, repos):
-        files = getHelmCharts(None, None)
-        for f in files:
-            f = f.replace('\\', '/')
-            newFile = f
-            if newFile == "charts":
-                continue
-            content = "Hello world".encode()
-            print(newFile)
-            repos.create_file(
-                path=newFile,
-                message="Create file for testCreateFile",
-                content="this is the file content",
-                branch="master",
-            )
-
     def commitPKLFile(self):
         pass
 
     def commitAppFile(self):
         # get the app path, then scan the file and then update it .
-        
-        pass
+        print(abspath(os.curdir))
+        ct = get_file_content("app.py")
+        print(ct)
+
+
+        appFile = self.repo.get_contents("/app.py")
+        if not type(appFile) == list:
+            print(appFile.sha)
 
     def getWorkflowStatus(self, commit_sha):
         repo = self.getRepo()
