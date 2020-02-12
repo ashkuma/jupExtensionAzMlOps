@@ -91,19 +91,22 @@ def get_application_json_header():
     return {'Content-Type': 'application/json' + '; charset=utf-8',
             'Accept': 'application/json'}
 
+
 def get_application_json_header_for_preview():
     return {'Accept': 'application/vnd.github.antiope-preview+json'}
 
-def get_check_runs_for_commit(repo_name,repo_owner, commmit_sha,token):
+
+def get_check_runs_for_commit(repo_name, repo_owner, commmit_sha, token):
     """
     API Documentation - https://developer.github.com/v3/checks/runs/#list-check-runs-for-a-specific-ref
     """
     headers = get_application_json_header_for_preview()
 
     get_check_runs_url = 'https://api.github.com/repos/{owner}/{repo_id}/commits/{ref}/check-runs'.format(owner=repo_owner,
-        repo_id=repo_name, ref=commmit_sha)
+                                                                                                          repo_id=repo_name, ref=commmit_sha)
     print(get_check_runs_url)
-    get_response = requests.get(url=get_check_runs_url, auth=('', token), headers=headers)
+    get_response = requests.get(
+        url=get_check_runs_url, auth=('', token), headers=headers)
     if not get_response.status_code == 200:
         print(" could not find the valid url")
         print(get_response)
@@ -112,11 +115,12 @@ def get_check_runs_for_commit(repo_name,repo_owner, commmit_sha,token):
     return json.loads(get_response.text)
 
 
-def get_work_flow_check_runID(repo_name, repo_owner, commmit_sha,token):
+def get_work_flow_check_runID(repo_name, repo_owner, commmit_sha, token):
     check_run_found = False
     count = 0
     while(not check_run_found or count > 3):
-        check_runs_list_response = get_check_runs_for_commit(repo_name,repo_owner, commmit_sha, token)
+        check_runs_list_response = get_check_runs_for_commit(
+            repo_name, repo_owner, commmit_sha, token)
         if check_runs_list_response and check_runs_list_response['total_count'] > 0:
             # fetch the Github actions check run and its check run ID
             check_runs_list = check_runs_list_response['check_runs']
@@ -136,8 +140,9 @@ def get_check_run_status_and_conclusion(repo_name, repo_owner, check_run_id, tok
     """
     headers = get_application_json_header_for_preview()
     get_check_run_url = 'https://api.github.com/repos/{owner}/{repo_id}/check-runs/{checkID}'.format(owner=repo_owner,
-        repo_id=repo_name, checkID=check_run_id)
-    get_response = requests.get(url=get_check_run_url, auth=('', token), headers=headers)
+                                                                                                     repo_id=repo_name, checkID=check_run_id)
+    get_response = requests.get(
+        url=get_check_run_url, auth=('', token), headers=headers)
     if not get_response.status_code == _HTTP_SUCCESS_STATUS:
         print(" no valid status code")
         return
@@ -150,7 +155,8 @@ def poll_workflow_status(repo_name, repo_owner, check_run_id, token):
     import humanfriendly
     import time
     check_run_status = None
-    check_run_status, check_run_conclusion = get_check_run_status_and_conclusion(repo_name,repo_owner, check_run_id, token)
+    check_run_status, check_run_conclusion = get_check_run_status_and_conclusion(
+        repo_name, repo_owner, check_run_id, token)
 
     if check_run_status == 'completed':
         print("already completed")
@@ -161,7 +167,8 @@ def poll_workflow_status(repo_name, repo_owner, check_run_id, token):
             while True:
                 spinner.step()
                 time.sleep(0.5)
-                check_run_status, check_run_conclusion = get_check_run_status_and_conclusion(repo_name,repo_owner, check_run_id, token)
+                check_run_status, check_run_conclusion = get_check_run_status_and_conclusion(
+                    repo_name, repo_owner, check_run_id, token)
                 if check_run_status in ('in_progress', 'completed'):
                     break
         colorama.deinit()
@@ -172,9 +179,21 @@ def poll_workflow_status(repo_name, repo_owner, check_run_id, token):
             while True:
                 spinner.step()
                 time.sleep(0.5)
-                check_run_status, check_run_conclusion = get_check_run_status_and_conclusion(repo_name,repo_owner, check_run_id, token)
+                check_run_status, check_run_conclusion = get_check_run_status_and_conclusion(
+                    repo_name, repo_owner, check_run_id, token)
                 if check_run_status == 'completed':
                     break
         colorama.deinit()
     print('GitHub workflow completed.')
     return (check_run_status, check_run_conclusion)
+
+
+def encrypt_secret(public_key, secret_value):
+    """Encrypt a Unicode string using the public key."""
+    from base64 import encodebytes
+    from nacl import encoding, public
+    public_key = public.PublicKey(
+        public_key.encode("utf-8"), encoding.Base64Encoder())
+    sealed_box = public.SealedBox(public_key)
+    encrypted = sealed_box.encrypt(secret_value.encode("utf-8"))
+    return encodebytes(encrypted).decode("utf-8")

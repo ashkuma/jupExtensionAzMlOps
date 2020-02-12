@@ -110,7 +110,6 @@ class GithubManager():
             values = repos.get_contents(f.path)
             if not type(values) == list:
                 sha = values.sha
-                print(sha)
                 if f.path.startswith("charts"):
                     repos.delete_file(
                         path=f.path,
@@ -173,4 +172,35 @@ class GithubManager():
         # configure_aks_credentials(cluster_details['name'], cluster_details['resourceGroup'])
         # deployment_ip, port = get_deployment_IP_port(RELEASE_NAME, language)
         # print('Your app is deployed at: http://{ip}:{port}'.format(ip=deployment_ip, port=port))
-        pass
+
+    def createRepoSecret(self, repo, secret_name, secret_value):
+        """
+        repo should be repository full name like {username}/{repo_name} : shpraka/testmlrepo
+        API Documentation - https://developer.github.com/v3/actions/secrets/#create-or-update-a-secret-for-a-repository
+        """
+        token = self.patToken
+        headers = get_application_json_header()
+        key_details = self.getPublicKey(repo)
+        encrypted_text = encrypt_secret(key_details['key'], secret_value)
+        # Remove the additional new lines added by encoder
+        encrypted_text = encrypted_text.replace('\n', '')
+        create_secre_request_body = {
+            "encrypted_value": encrypted_text,
+            "key_id": key_details['key_id']
+        }
+        create_secrets_url = 'https://api.github.com/repos/{repo}/actions/secrets/{secret_name}'.format(
+            repo=repo, secret_name=secret_name)
+        response = requests.put(create_secrets_url, auth=(
+            '', token), json=create_secre_request_body, headers=headers)
+        print(response)
+
+    def getPublicKey(self, repo):
+        """
+        API Documentation - https://developer.github.com/v3/actions/secrets/#get-your-public-key
+        """
+        get_public_key_url = 'https://api.github.com/repos/{repo}/actions/secrets/public-key'.format(
+            repo=repo)
+        get_response = requests.get(
+            get_public_key_url, auth=('', self.patToken))
+        key_details = get_response.json()
+        return key_details
