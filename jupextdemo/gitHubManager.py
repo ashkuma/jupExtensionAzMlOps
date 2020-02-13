@@ -141,7 +141,6 @@ class GithubManager():
         ct = get_file_content("app.py")
         print(ct)
 
-
         appFile = self.repo.get_contents("/app.py")
         if not type(appFile) == list:
             print(appFile.sha)
@@ -169,23 +168,25 @@ class GithubManager():
     def createRepoSecret(self, repo, secret_name, secret_value):
         """
         repo should be repository full name like {username}/{repo_name} : shpraka/testmlrepo
-        API Documentation - https://developer.github.com/v3/actions/secrets/#create-or-update-a-secret-for-a-repository
+        # create-or-update-a-secret-for-a-repository
+        API Documentation - https://developer.github.com/v3/actions/secrets/
         """
-        token = self.patToken
-        headers = get_application_json_header()
-        key_details = self.getPublicKey(repo)
-        encrypted_text = encrypt_secret(key_details['key'], secret_value)
-        # Remove the additional new lines added by encoder
-        encrypted_text = encrypted_text.replace('\n', '')
-        create_secre_request_body = {
-            "encrypted_value": encrypted_text,
-            "key_id": key_details['key_id']
-        }
-        create_secrets_url = 'https://api.github.com/repos/{repo}/actions/secrets/{secret_name}'.format(
-            repo=repo, secret_name=secret_name)
-        response = requests.put(create_secrets_url, auth=(
-            '', token), json=create_secre_request_body, headers=headers)
-        print(response)
+        if not self.checkIfSecretExists(repo, secret_name):
+            token = self.patToken
+            headers = get_application_json_header()
+            key_details = self.getPublicKey(repo)
+            encrypted_text = encrypt_secret(key_details['key'], secret_value)
+            # Remove the additional new lines added by encoder
+            encrypted_text = encrypted_text.replace('\n', '')
+            create_secre_request_body = {
+                "encrypted_value": encrypted_text,
+                "key_id": key_details['key_id']
+            }
+            create_secrets_url = 'https://api.github.com/repos/{repo}/actions/secrets/{secret_name}'.format(
+                repo=repo, secret_name=secret_name)
+            response = requests.put(create_secrets_url, auth=(
+                '', token), json=create_secre_request_body, headers=headers)
+            print(response)
 
     def getPublicKey(self, repo):
         """
@@ -197,3 +198,15 @@ class GithubManager():
             get_public_key_url, auth=('', self.patToken))
         key_details = get_response.json()
         return key_details
+
+    def checkIfSecretExists(self, repoFullName, secret_name):
+        get_secrets_url = 'https://api.github.com/repos/{repo}/actions/secrets'.format(
+            repo=repoFullName, secret_name=secret_name)
+        get_response = requests.get(
+            get_secrets_url, auth=('', self.patToken))
+        secretResponse = get_response.json()
+        if len(secretResponse['secrets']) > 0:
+            for secret in secretResponse['secrets']:
+                if secret['name'] == secret_name:
+                    return True
+        return False
