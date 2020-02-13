@@ -1,6 +1,9 @@
 from github import Github, GithubException
 from .utils import *
 from .githubHelper import *
+from .azaks_deploy import AKSDeploy
+from jupextdemo.const import (
+    AZURE_CREDENTIALS, REGISTRY_USERNAME, REGISTRY_PASSWORD)
 
 
 class GithubManager():
@@ -8,7 +11,7 @@ class GithubManager():
         self.patToken = patToken
         self.g = Github(self.patToken)
         self.repo = None
-
+        self.aksDeploy = AKSDeploy()
 
     def _getNewToken(self):
         return self.patToken
@@ -19,6 +22,7 @@ class GithubManager():
         # 3 assuming user already has docker file
         # assuming helmCharts and workflow have to be pushed
         repo = self.getRepo()
+        self.pushGithubSecrets(repo)
         returnCommit = None
         if repo == None:
             print("PAT entered is not for the correct owner of this repository. Make sure you are in the repository and notebook is opened from that repo only. ")
@@ -31,6 +35,18 @@ class GithubManager():
                 repo, cluster_details, acr_details)
             print(returnCommit['commit'].sha)
             self.getWorkflowStatus(returnCommit['commit'].sha)
+
+    def pushGithubSecrets(self, repo):
+        repoFullName = repo.owner.login + "/" + repo.name
+        if not self.checkIfSecretExists(repoFullName, AZURE_CREDENTIALS):
+            azCredentials = self.aksDeploy.getAzureCredentials()
+            self.createRepoSecret(repo, AZURE_CREDENTIALS, azCredentials)
+        if not self.checkIfSecretExists(repoFullName, AZURE_CREDENTIALS):
+            secretValue = self.aksDeploy.getServicePrinciple()
+            self.createRepoSecret(repo, REGISTRY_USERNAME,
+                                  secretValue["appId"])
+            self.createRepoSecret(repo, REGISTRY_PASSWORD,
+                                  secretValue["password"])
 
     def getRepo(self):
         # TODO : check if this works when i am in any branch as well
@@ -151,8 +167,8 @@ class GithubManager():
         check_run_id = get_work_flow_check_runID(
             repo.name, repo.owner.login, commit_sha, self.patToken)
         print(check_run_id)
-        workflow_url = 'https://github.com/{repo_id}/runs/{checkID}'.format(repo_id=repo.name,
-                                                                            checkID=check_run_id)
+        workflow_url = 'https://github.com/{owner}/{repo_id}/runs/{checkID}'.format(owner=repo.owner.login, repo_id=repo.name,
+                                                                                    checkID=check_run_id)
         print('GitHub Action workflow has been created - {}'.format(workflow_url))
 
         check_run_status, check_run_conclusion = poll_workflow_status(
@@ -172,8 +188,8 @@ class GithubManager():
         # create-or-update-a-secret-for-a-repository
         API Documentation - https://developer.github.com/v3/actions/secrets/
         """
+        repo = repoObj.owner.login + "/" + repoObj.name
         if not self.checkIfSecretExists(repo, secret_name):
-            repo = repoObj.owner.login + "/" + repoObj.name
             token = self.patToken
             headers = get_application_json_header()
             key_details = self.getPublicKey(repo)

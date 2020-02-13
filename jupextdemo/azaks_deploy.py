@@ -3,17 +3,16 @@ import os
 import sys
 import subprocess
 import json
-from .gitHubManager import GithubManager
 
 
 class AKSDeploy():
     def __init__(self):
         self.currentSubscription = None
-        self.CurrentACR = None;
-        self.CurrentAKS = None;
+        self.CurrentACR = None
+        self.CurrentAKS = None
         self.UserLoggedIn = False
-        self.azResourceHelper = AKSDeploy_ResourceHelper();
-        self.azResourceCreator = AKSDeploy_ResourceCreator();
+        self.azResourceHelper = AKSDeploy_ResourceHelper()
+        self.azResourceCreator = AKSDeploy_ResourceCreator()
 
     def IsUserLoggedIn(self):
         if self.UserLoggedIn == True:
@@ -24,39 +23,40 @@ class AKSDeploy():
             accountsList = self.getUserAccountList()
             if len(accountsList) == 0:
                 self.UserLoggedIn = False
-                
+
             else:
-                self.UserLoggedIn = True;
-                
+                self.UserLoggedIn = True
+
         except:
-            self.UserLoggedIn=False
-            
-        return self.UserLoggedIn;
+            self.UserLoggedIn = False
+
+        return self.UserLoggedIn
 
     def getUserAccountList(self):
-        accountsList = subprocess.check_output("az account list -o json", shell=True)
+        accountsList = subprocess.check_output(
+            "az account list -o json", shell=True)
 
         return json.loads(accountsList)
-
 
     def loginUserFlow(self):
         try:
             loginOutput = subprocess.check_output("az login")
             print(loginOutput)
-            #TODO : This is a bug, here check the output when user didn't complete the login
+            # TODO : This is a bug, here check the output when user didn't complete the login
             self.UserLoggedIn = True
         except:
             self.UserLoggedIn = False
             print("cloud not autehnticate user")
 
     def getDefaultSubscription(self):
-        accountsList = json.loads(subprocess.check_output("az account list -o json", shell=True))
-        s={}
-        for acc in accountsList :
+        accountsList = json.loads(subprocess.check_output(
+            "az account list -o json", shell=True))
+        s = {}
+        for acc in accountsList:
             if acc["isDefault"]:
-                s[acc['id']]=acc["name"]
+                s[acc['id']] = acc["name"]
                 self.currentSubscription = acc['id']
-        
+
         return s
 
     def getAzureCredentials(self):
@@ -75,41 +75,50 @@ class AKSDeploy():
         return self.azResourceHelper.getAKSDetails(self.currentSubscription)
 
     def getYamlTemplate(self):
-        return None;
+        return None
+
 
 class AKSDeploy_ResourceHelper():
     def __init__(self):
         pass
-    def getResourceGroup(self,subscription):
-        group_list = subprocess.check_output('az group list --subscription {subscription} -o json'.format(subscription=subscription), shell=True)
+
+    def getResourceGroup(self, subscription):
+        group_list = subprocess.check_output(
+            'az group list --subscription {subscription} -o json'.format(subscription=subscription), shell=True)
         group_list = json.loads(group_list)
         return group_list
 
-    def getACRDetails(self,subscription):
-        acr_list = subprocess.check_output('az acr list --subscription {subscription} -o json'.format(subscription=subscription), shell=True)
+    def getACRDetails(self, subscription):
+        acr_list = subprocess.check_output(
+            'az acr list --subscription {subscription} -o json'.format(subscription=subscription), shell=True)
         acr_list_json = json.loads(acr_list)
         return acr_list_json
 
-    def getAKSDetails(self,subscription):
-        aks_list = subprocess.check_output('az aks list --subscription {subscription} -o json'.format(subscription=subscription), shell=True)
+    def getAKSDetails(self, subscription):
+        aks_list = subprocess.check_output(
+            'az aks list --subscription {subscription} -o json'.format(subscription=subscription), shell=True)
         aks_list_json = json.loads(aks_list)
         return aks_list_json
-        
+
     def createAzureCredentials(self):
-        auth_details = subprocess.check_output('az ad sp create-for-rbac --sdk-auth -o json', shell=True)
+        auth_details = subprocess.check_output(
+            'az ad sp create-for-rbac --sdk-auth -o json', shell=True)
         auth_details_json = json.loads(auth_details)
         return json.dumps(auth_details_json)
 
     def createServicePrinciple(self):
-        sp_details = subprocess.check_output('az ad sp create-for-rbac -o json', shell=True)
+        sp_details = subprocess.check_output(
+            'az ad sp create-for-rbac -o json', shell=True)
         sp_details = json.loads(sp_details)
         return sp_details
+
 
 class AKSDeploy_ResourceCreator():
     def __init__(self):
 
         pass
-    def createNewACR(self,registry_name, resource_group, sku='Basic'):
+
+    def createNewACR(self, registry_name, resource_group, sku='Basic'):
         try:
             acr_create = subprocess.check_output(
                 ('az acr create --name {acr_name} --sku {sku} -g {group_name} -o json')
@@ -119,7 +128,7 @@ class AKSDeploy_ResourceCreator():
         except Exception as ex:
             print(ex)
 
-    def createNewAks(self,cluster_name,resource_group):
+    def createNewAks(self, cluster_name, resource_group):
         try:
             aks_create = subprocess.check_output(('az aks create --name {cluster_name} -g {group_name} -o json').format(
                 cluster_name=cluster_name, group_name=resource_group), shell=True)
@@ -129,10 +138,8 @@ class AKSDeploy_ResourceCreator():
             print(ex)
             pass
 
-    def setCurrentACR(self,acrName):
+    def setCurrentACR(self, acrName):
         pass
-    def setCurrentAKS(self,acrName):
-        pass
-    
 
-        
+    def setCurrentAKS(self, acrName):
+        pass
