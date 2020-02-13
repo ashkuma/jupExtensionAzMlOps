@@ -59,6 +59,12 @@ class AKSDeploy():
         
         return s
 
+    def getAzureCredentials(self):
+        return self.azResourceHelper.createAzureCredentials()
+
+    def getServicePrinciple(self):
+        return self.azResourceHelper.createServicePrinciple()
+
     def getResourceGroup(self):
         return self.azResourceHelper.getResourceGroup(self.currentSubscription)
 
@@ -92,7 +98,12 @@ class AKSDeploy_ResourceHelper():
     def createAzureCredentials(self):
         auth_details = subprocess.check_output('az ad sp create-for-rbac --sdk-auth -o json', shell=True)
         auth_details_json = json.loads(auth_details)
-        return auth_details_json
+        return json.dumps(auth_details_json)
+
+    def createServicePrinciple(self):
+        sp_details = subprocess.check_output('az ad sp create-for-rbac -o json', shell=True)
+        sp_details = json.loads(sp_details)
+        return sp_details
 
 class AKSDeploy_ResourceCreator():
     def __init__(self):

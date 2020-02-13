@@ -9,6 +9,7 @@ class GithubManager():
         self.g = Github(self.patToken)
         self.repo = None
 
+
     def _getNewToken(self):
         return self.patToken
 
@@ -16,7 +17,7 @@ class GithubManager():
         # 1 assume language as python
         # 2 assume we are in the same repo, from where is it invoking
         # 3 assuming user already has docker file
-        # assuming helmCharts and
+        # assuming helmCharts and workflow have to be pushed
         repo = self.getRepo()
         returnCommit = None
         if repo == None:
@@ -166,11 +167,12 @@ class GithubManager():
         # deployment_ip, port = get_deployment_IP_port(RELEASE_NAME, language)
         # print('Your app is deployed at: http://{ip}:{port}'.format(ip=deployment_ip, port=port))
 
-    def createRepoSecret(self, repo, secret_name, secret_value):
+    def createRepoSecret(self, repoObj, secret_name, secret_value):
         """
         repo should be repository full name like {username}/{repo_name} : shpraka/testmlrepo
         API Documentation - https://developer.github.com/v3/actions/secrets/#create-or-update-a-secret-for-a-repository
         """
+        repo = repoObj.owner.login + "/" + repoObj.name
         token = self.patToken
         headers = get_application_json_header()
         key_details = self.getPublicKey(repo)
