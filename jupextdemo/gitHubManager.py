@@ -28,13 +28,13 @@ class GithubManager():
             print("PAT entered is not for the correct owner of this repository. Make sure you are in the repository and notebook is opened from that repo only. ")
             return
         if not self.chartsExist(repo):
-            self.pushCharts(repo, acr_details, "5000")
+            self.pushCharts(repo, acr_details, PORT_NUMBER_DEFAULT)
 
         if not self.workFlowFileExists(repo):
             returnCommit = self.pushWorkFlow(
                 repo, cluster_details, acr_details)
             print(returnCommit['commit'].sha)
-            self.getWorkflowStatus(returnCommit['commit'].sha)
+            self.getWorkflowStatus(returnCommit['commit'].sha, cluster_details)
 
     def pushGithubSecrets(self, repo):
         repoFullName = repo.owner.login + "/" + repo.name
@@ -61,7 +61,7 @@ class GithubManager():
     def pushTestFile(self):
         pass
 
-    def pushCharts(self, repo, acr_details, port="5000"):
+    def pushCharts(self, repo, acr_details, port=PORT_NUMBER_DEFAULT):
         files = getHelmCharts(acr_details, port)
         for f in files:
             newFile = f.path
@@ -162,7 +162,7 @@ class GithubManager():
         if not type(appFile) == list:
             print(appFile.sha)
 
-    def getWorkflowStatus(self, commit_sha):
+    def getWorkflowStatus(self, commit_sha, cluster_details):
         repo = self.getRepo()
         check_run_id = get_work_flow_check_runID(
             repo.name, repo.owner.login, commit_sha, self.patToken)
@@ -178,9 +178,11 @@ class GithubManager():
         print("check_run_status " + str(check_run_status))
         print("check_run_conclusion " + str(check_run_conclusion))
 
-        # configure_aks_credentials(cluster_details['name'], cluster_details['resourceGroup'])
-        # deployment_ip, port = get_deployment_IP_port(RELEASE_NAME, language)
-        # print('Your app is deployed at: http://{ip}:{port}'.format(ip=deployment_ip, port=port))
+        configure_aks_credentials(
+            cluster_details['name'], cluster_details['resourceGroup'])
+        deployment_ip, port = get_deployment_IP_port(RELEASE_NAME, "python")
+        print(
+            'Your app is deployed at: http://{ip}:{port}'.format(ip=deployment_ip, port=port))
 
     def createRepoSecret(self, repoObj, secret_name, secret_value):
         """

@@ -132,3 +132,61 @@ def getUserSubscriptionsList():
         s[acc['id']] = acc["name"]
 
     print(s)
+    return s
+
+
+def getDefaultSubcriptionInfo():
+    subscriptionList = getUserSubscriptionsList()
+    for subscription in subscriptionList:
+        if subscription['isDefault']:
+            return subscription['id'], subscription['name'], subscription['tenantId'], subscription['environmentName']
+    print(
+        'Your account does not have a default Azure subscription. Please run \'az login\' to setup account.')
+    return None, None, None, None
+
+
+def configure_aks_credentials(cluster_name, resource_group):
+    try:
+        subscription_id, subscription_name, tenant_id, environment_name = getDefaultSubcriptionInfo()
+        print("Using your default Azure subscription %s for getting AKS cluster credentials.",
+              subscription_name)
+        _aks_creds = subprocess.check_output(
+            'az aks get-credentials -n {cluster_name} -g {group_name} -o json'.format(
+                cluster_name=cluster_name, group_name=resource_group), shell=True)
+        # print(_aks_creds)
+    except Exception as ex:
+        print(ex)
+
+
+def get_deployment_IP_port(release_name, language):
+    if not which('kubectl'):
+        print('Can not find kubectl executable in PATH')
+    try:
+        import subprocess
+        import json
+        service_name = release_name + '-' + language.lower()
+        service_details = subprocess.check_output(
+            'kubectl get service {} -o json'.format(service_name), shell=True)
+        service_obj = json.loads(service_details)
+        deployment_ip = service_obj['status']['loadBalancer']['ingress'][0]['ip']
+        port = service_obj['spec']['ports'][0]['port']
+        return deployment_ip, port
+    except subprocess.CalledProcessError as err:
+        print('Could not find app/service: {}'.format(err))
+
+
+def which(binary):
+    path_var = os.getenv('PATH')
+    import platform
+    if platform.system() == 'Windows':
+        binary = binary + '.exe'
+        parts = path_var.split(';')
+    else:
+        parts = path_var.split(':')
+
+    for part in parts:
+        bin_path = os.path.join(part, binary)
+        if os.path.exists(bin_path) and os.path.isfile(bin_path) and os.access(bin_path, os.X_OK):
+            return bin_path
+
+    return None
