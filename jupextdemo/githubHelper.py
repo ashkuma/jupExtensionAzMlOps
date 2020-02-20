@@ -152,7 +152,6 @@ def get_check_run_status_and_conclusion(repo_name, repo_owner, check_run_id, tok
 
 def poll_workflow_status(repo_name, repo_owner, check_run_id, token):
     import colorama
-    import humanfriendly
     import time
     check_run_status = None
     check_run_status, check_run_conclusion = get_check_run_status_and_conclusion(
@@ -163,26 +162,24 @@ def poll_workflow_status(repo_name, repo_owner, check_run_id, token):
     elif check_run_status == 'queued':
         # When workflow status is Queued
         colorama.init()
-        with humanfriendly.Spinner(label="Workflow is in queue") as spinner:
-            while True:
-                spinner.step()
-                time.sleep(0.5)
-                check_run_status, check_run_conclusion = get_check_run_status_and_conclusion(
-                    repo_name, repo_owner, check_run_id, token)
-                if check_run_status in ('in_progress', 'completed'):
-                    break
+        while True:
+            spinner.step()
+            time.sleep(0.5)
+            check_run_status, check_run_conclusion = get_check_run_status_and_conclusion(
+                repo_name, repo_owner, check_run_id, token)
+            if check_run_status in ('in_progress', 'completed'):
+                break
         colorama.deinit()
     elif check_run_status == 'in_progress':
         # When workflow status is inprogress
         colorama.init()
-        with humanfriendly.Spinner(label="Workflow is in progress") as spinner:
-            while True:
-                spinner.step()
-                time.sleep(0.5)
-                check_run_status, check_run_conclusion = get_check_run_status_and_conclusion(
-                    repo_name, repo_owner, check_run_id, token)
-                if check_run_status == 'completed':
-                    break
+        while True:
+            spinner.step()
+            time.sleep(0.5)
+            check_run_status, check_run_conclusion = get_check_run_status_and_conclusion(
+                repo_name, repo_owner, check_run_id, token)
+            if check_run_status == 'completed':
+                break
         colorama.deinit()
     print('GitHub workflow completed.')
     return (check_run_status, check_run_conclusion)

@@ -12,7 +12,7 @@ RG_PLACEHOLDER = 'resource_name_place_holder'
 
 PORT_NUMBER_DEFAULT = '8080'
 APP_NAME_DEFAULT = 'k8sdemo'
-RELEASE_NAME = 'aksappupdemo'
+RELEASE_NAME = 'aksappupdemo1'
 
 # Checkin message strings
 
@@ -153,7 +153,7 @@ def configure_aks_credentials(cluster_name, resource_group):
         _aks_creds = subprocess.check_output(
             'az aks get-credentials -n {cluster_name} -g {group_name} -o json'.format(
                 cluster_name=cluster_name, group_name=resource_group), shell=True)
-        # print(_aks_creds)
+        print(_aks_creds)
     except Exception as ex:
         print(ex)
 

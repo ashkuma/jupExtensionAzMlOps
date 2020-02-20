@@ -41,7 +41,7 @@ class GithubManager():
         if not self.checkIfSecretExists(repoFullName, AZURE_CREDENTIALS):
             azCredentials = self.aksDeploy.getAzureCredentials()
             self.createRepoSecret(repo, AZURE_CREDENTIALS, azCredentials)
-        if not self.checkIfSecretExists(repoFullName, AZURE_CREDENTIALS):
+        if not self.checkIfSecretExists(repoFullName, REGISTRY_USERNAME):
             secretValue = self.aksDeploy.getServicePrinciple()
             self.createRepoSecret(repo, REGISTRY_USERNAME,
                                   secretValue["appId"])
