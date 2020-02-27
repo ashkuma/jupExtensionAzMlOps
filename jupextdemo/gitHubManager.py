@@ -171,18 +171,18 @@ class GithubManager():
                                                                                     checkID=check_run_id)
         print('GitHub Action workflow has been created - {}'.format(workflow_url))
 
+        configure_aks_credentials(
+            cluster_details['name'], cluster_details['resourceGroup'])
+        deployment_ip, port = get_deployment_IP_port(RELEASE_NAME, "python")
+        print(
+            'Your app is being deployed at: http://{ip}:{port}/hello'.format(ip=deployment_ip, port=port))
+        print(" Checking run status")
         check_run_status, check_run_conclusion = poll_workflow_status(
             repo.name, repo.owner.login, check_run_id, self.patToken)
 
         print(" workflow completed : ")
         print("check_run_status " + str(check_run_status))
         print("check_run_conclusion " + str(check_run_conclusion))
-
-        configure_aks_credentials(
-            cluster_details['name'], cluster_details['resourceGroup'])
-        deployment_ip, port = get_deployment_IP_port(RELEASE_NAME, "python")
-        print(
-            'Your app is deployed at: http://{ip}:{port}'.format(ip=deployment_ip, port=port))
 
     def createRepoSecret(self, repoObj, secret_name, secret_value):
         """

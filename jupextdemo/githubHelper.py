@@ -151,7 +151,6 @@ def get_check_run_status_and_conclusion(repo_name, repo_owner, check_run_id, tok
 
 
 def poll_workflow_status(repo_name, repo_owner, check_run_id, token):
-    import colorama
     import time
     check_run_status = None
     check_run_status, check_run_conclusion = get_check_run_status_and_conclusion(
@@ -161,26 +160,22 @@ def poll_workflow_status(repo_name, repo_owner, check_run_id, token):
         print("already completed")
     elif check_run_status == 'queued':
         # When workflow status is Queued
-        colorama.init()
         while True:
-            spinner.step()
             time.sleep(0.5)
             check_run_status, check_run_conclusion = get_check_run_status_and_conclusion(
                 repo_name, repo_owner, check_run_id, token)
-            if check_run_status in ('in_progress', 'completed'):
-                break
-        colorama.deinit()
-    elif check_run_status == 'in_progress':
-        # When workflow status is inprogress
-        colorama.init()
-        while True:
-            spinner.step()
-            time.sleep(0.5)
-            check_run_status, check_run_conclusion = get_check_run_status_and_conclusion(
-                repo_name, repo_owner, check_run_id, token)
+            print(".")
             if check_run_status == 'completed':
                 break
-        colorama.deinit()
+    elif check_run_status == 'in_progress':
+        # When workflow status is inprogress
+        while True:
+            time.sleep(0.5)
+            check_run_status, check_run_conclusion = get_check_run_status_and_conclusion(
+                repo_name, repo_owner, check_run_id, token)
+            print(".")
+            if check_run_status == 'completed':
+                break
     print('GitHub workflow completed.')
     return (check_run_status, check_run_conclusion)
 
