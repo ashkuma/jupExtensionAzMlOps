@@ -7,7 +7,7 @@ RG_PLACEHOLDER = 'resource_name_place_holder'
 
 PORT_NUMBER_DEFAULT = '8080'
 APP_NAME_DEFAULT = 'k8sdemo'
-RELEASE_NAME = 'aksappupdemo'
+RELEASE_NAME = 'aksappupdemo2'
 
 # Checkin message strings
 
