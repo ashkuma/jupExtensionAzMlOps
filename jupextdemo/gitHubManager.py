@@ -27,13 +27,19 @@ class GithubManager():
         if repo == None:
             print("PAT entered is not for the correct owner of this repository. Make sure you are in the repository and notebook is opened from that repo only. ")
             return
-        if not self.chartsExist(repo):
+        ifChartsExists = self.chartsExist(repo)
+        ifWorkFlowExists = self.workFlowFileExists(repo)
+        if not ifChartsExists:
             self.pushCharts(repo, acr_details, PORT_NUMBER_DEFAULT)
 
-        if not self.workFlowFileExists(repo):
+        if not ifWorkFlowExists:
             returnCommit = self.pushWorkFlow(
                 repo, cluster_details, acr_details)
-            print(returnCommit['commit'].sha)
+            self.getWorkflowStatus(returnCommit['commit'].sha, cluster_details)
+
+        if ifWorkFlowExists and ifChartsExists:
+            print("Pushing pkl file")
+            returnCommit = self.pushPKLFile(repo)
             self.getWorkflowStatus(returnCommit['commit'].sha, cluster_details)
 
     def pushGithubSecrets(self, repo):
@@ -149,8 +155,11 @@ class GithubManager():
                         branch="master",
                     )
 
-    def commitPKLFile(self):
-        pass
+    def pushPKLFile(self, repo):
+        ct = get_file_content("azdevopsdemo.pkl")
+        #ct = get_file_content("app.py")
+        contents = repo.get_contents("/azdevopsdemo.py")
+        return repo.update_file(path=contents.path, message="updating pkl file", content=ct, sha=contents.sha, branch="master")
 
     def commitAppFile(self):
         # get the app path, then scan the file and then update it .

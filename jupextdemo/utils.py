@@ -153,7 +153,6 @@ def configure_aks_credentials(cluster_name, resource_group):
         _aks_creds = subprocess.check_output(
             'az aks get-credentials -n {cluster_name} -g {group_name} -o json'.format(
                 cluster_name=cluster_name, group_name=resource_group), shell=True)
-        print(_aks_creds)
     except Exception as ex:
         print(ex)
 
