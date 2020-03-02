@@ -3,6 +3,7 @@ from jupextdemo.azaks_deploy import *
 from jupextdemo.gitHubManager import GithubManager
 from jupextdemo.const import *
 
+
 def _test_accounts():
     pass
 
@@ -30,20 +31,13 @@ if __name__ == "__main__":
     secretValue = aks_dep.getServicePrinciple()
     print(secretValue)
 
-
     # now use this object and pass it to Github manager to implement
 
     gm = GithubManager("")
-    gm.getRepo();
+    repo = gm.getRepo()
 
-    ## add Az credentials to github 
-    gm.createRepoSecret(gm.repo,AZURE_CREDENTIALS,azCredentials)
-
-
-    gm.createRepoSecret(gm.repo,REGISTRY_USERNAME,secretValue["appId"])
-
-
-    gm.createRepoSecret(gm.repo,REGISTRY_PASSWORD,secretValue["password"])
+    # add Az credentials to github
+    gm.pushPKLFile(repo)
     # akscluster = replyObject["AKSCluster"][0] if len(
     #     replyObject["AKSCluster"]) > 0 else None
     # acrAccount = replyObject["ACRAccount"][0] if len(

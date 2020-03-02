@@ -156,10 +156,13 @@ class GithubManager():
                     )
 
     def pushPKLFile(self, repo):
-        ct = get_file_content("azdevopsdemo.pkl")
-        #ct = get_file_content("app.py")
+        f = open("azdevopsdemo.pkl", "rb")
+        data = f.read()
+        f.close()
+
         contents = repo.get_contents("/azdevopsdemo.pkl")
-        return repo.update_file(path=contents.path, message="updating pkl file", content=ct, sha=contents.sha, branch="master")
+        # print(type(data))
+        return repo.update_file(path=contents.path, message="updating pkl file", content=data, sha=contents.sha, branch="master")
 
     def commitAppFile(self):
         # get the app path, then scan the file and then update it .
