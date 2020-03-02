@@ -158,7 +158,7 @@ class GithubManager():
     def pushPKLFile(self, repo):
         ct = get_file_content("azdevopsdemo.pkl")
         #ct = get_file_content("app.py")
-        contents = repo.get_contents("/azdevopsdemo.py")
+        contents = repo.get_contents("/azdevopsdemo.pkl")
         return repo.update_file(path=contents.path, message="updating pkl file", content=ct, sha=contents.sha, branch="master")
 
     def commitAppFile(self):
