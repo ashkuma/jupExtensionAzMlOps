@@ -174,13 +174,13 @@ define(["base/js/namespace", "base/js/events"], function(Jupyter, events) {
                 code_init = data;
                 acrReplacement = getACRDetails();
                 if (acrReplacement != undefined) {
-                    code_init = code_init.replace("ACRPLACEHOLDER", "aaaaaademo");
+                    code_init = code_init.replace("ACRPLACEHOLDER", acrReplacement["name"]);
                 }
 
                 aksReplacement = getAKSDetails();
                 if (aksReplacement != undefined) {
-                    code_init = code_init.replace("AKSNAMEPLACEHOLDER", "aaaaaaa");
-                    code_init = code_init.replace("AKSRESOURCEGROUPPLACEHOLDER", "shpraka");
+                    code_init = code_init.replace("AKSNAMEPLACEHOLDER", aksReplacement["name"]);
+                    code_init = code_init.replace("AKSRESOURCEGROUPPLACEHOLDER", aksReplacement["resourceGroup"]);
                 }
 
                 if (patToken != undefined) {
