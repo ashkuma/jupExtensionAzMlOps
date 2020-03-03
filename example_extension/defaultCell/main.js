@@ -82,6 +82,18 @@ define(["base/js/namespace", "base/js/events"], function(Jupyter, events) {
 
     function deployment_complete_callback(msg) {
         var jsonVars = msg.content["text"];
+
+        try {
+            deploymentResult = JSON.parse(jsonVars);
+            if (deploymentResult.hasOwnProperty("deployUrl")) {
+                showDeploymentUrl(deploymentResult["deployUrl"]);
+            }
+        } catch {}
+        console.log(jsonVars);
+    }
+
+    function commit_files_callback(msg) {
+        var jsonVars = msg.content["text"];
         console.log(jsonVars);
     }
 
@@ -94,21 +106,21 @@ define(["base/js/namespace", "base/js/events"], function(Jupyter, events) {
             Jupyter.toolbar.add_buttons_group([
                 Jupyter.keyboard_manager.actions.register(
                     {
+                        help: "Commit Models and Notebooks",
+                        icon: "fa-wrench",
+                        handler: commitFiles
+                    },
+                    "commit-files",
+                    "Commit Files"
+                ),
+                Jupyter.keyboard_manager.actions.register(
+                    {
                         help: "Deploy Model to Azure",
                         icon: "fa-play-circle",
                         handler: deploy_Container
                     },
                     "deploy-to-azure",
                     "Deploy Model"
-                ),
-                Jupyter.keyboard_manager.actions.register(
-                    {
-                        help: "Generate AZCredentials",
-                        icon: "fa-wrench",
-                        handler: generateDependencies
-                    },
-                    "create_dependency",
-                    "Generate Dependency Files"
                 )
             ]);
         } catch {
@@ -134,6 +146,11 @@ define(["base/js/namespace", "base/js/events"], function(Jupyter, events) {
             return patToken;
         }
         return undefined;
+    };
+
+    showDeploymentUrl = function(url) {
+        prompt(url);
+        return;
     };
 
     var deploy_Container = function() {
@@ -172,6 +189,38 @@ define(["base/js/namespace", "base/js/events"], function(Jupyter, events) {
 
                 console.log(code_init);
                 Jupyter.notebook.kernel.execute(code_init, { iopub: { output: deployment_complete_callback } }, { silent: false });
+            })
+            .fail(function() {
+                console.log(log_prefix + "failed to load " + lib + " library");
+            });
+    };
+
+    var commitFiles = function() {
+        // create a docker container and then inform then system about the updates
+        patToken = undefined;
+        if (cfg.gitHubPatToken == undefined || cfg.gitHubPatToken == "" || cfg.gitHubPatToken == "None" || cfg.gitHubPatToken == null) {
+            // take the user PAT token, save it and then add it as well.
+            patToken = getPatTokenFromUser();
+            if (patToken == null || patToken == undefined) {
+                console.log(" Cant continue without a PAT token");
+                return;
+            }
+        } else {
+            patToken = cfg.gitHubPatToken;
+        }
+
+        console.log("Starting to commit files");
+        var libName = Jupyter.notebook.base_url + "nbextensions/defaultCell/" + "commitFiles.py";
+        $.get(libName)
+            .done(function(data) {
+                code_init = data;
+
+                if (patToken != undefined) {
+                    code_init = code_init.replace("GITHUBPATTOKEN", patToken);
+                }
+
+                console.log(code_init);
+                Jupyter.notebook.kernel.execute(code_init, { iopub: { output: commit_files_callback } }, { silent: false });
             })
             .fail(function() {
                 console.log(log_prefix + "failed to load " + lib + " library");

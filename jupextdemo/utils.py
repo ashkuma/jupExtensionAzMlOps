@@ -33,7 +33,7 @@ class Files:  # pylint: disable=too-few-public-methods
         self.content = content
 
 
-def getHelmCharts(acr_details, port):
+def getHelmCharts(acr_details, port, repo_name):
     languagePackPath = getLanguagePackPath()
     files = []
     langfilesPaths = testglob(languagePackPath)
@@ -44,7 +44,8 @@ def getHelmCharts(acr_details, port):
             continue
         file_content = get_file_content(name)
         if "values.yaml" in name:
-            file_content = replace_values(file_content, acr_details)
+            file_content = replace_values(
+                repo_name, file_content, acr_details)
             file_content = replace_port(file_content, port)
         if name.startswith(languagePackPath):
             name = name[len(languagePackPath):]
@@ -63,10 +64,10 @@ def get_yaml_template_for_repo(cluster_details, acr_details, repo_name):
     from resources.resourcefiles import DEPLOY_TO_AKS_TEMPLATE
     files_to_return.append(Files(path=workflow_yaml,
                                  content=DEPLOY_TO_AKS_TEMPLATE
-                                 .replace(APP_NAME_PLACEHOLDER, APP_NAME_DEFAULT)
+                                 .replace(APP_NAME_PLACEHOLDER, repo_name)
                                  .replace(ACR_PLACEHOLDER, acr_details['name'])
                                  .replace(CLUSTER_PLACEHOLDER, cluster_details['name'])
-                                 .replace(RELEASE_PLACEHOLDER, RELEASE_NAME)
+                                 .replace(RELEASE_PLACEHOLDER, repo_name)
                                  .replace(RG_PLACEHOLDER, cluster_details['resourceGroup'])))
     return files_to_return
 
@@ -102,12 +103,12 @@ def testglob(langpath):
     return glob.glob(langpath+"**", recursive=True)
 
 
-def replace_values(file_content, acr_details):
+def replace_values(app_name, file_content, acr_details):
     print(acr_details)
     acr_name = acr_details['name'] if (
-        acr_details != None and "name" in acr_details) else APP_NAME_DEFAULT
+        acr_details != None and "name" in acr_details) else app_name
     content = file_content.replace(
-        APP_NAME_PLACEHOLDER, APP_NAME_DEFAULT).replace(ACR_PLACEHOLDER, acr_name)
+        APP_NAME_PLACEHOLDER, app_name).replace(ACR_PLACEHOLDER, acr_name)
     return content
 
 

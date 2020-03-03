@@ -37,10 +37,9 @@ class GithubManager():
                 repo, cluster_details, acr_details)
             self.getWorkflowStatus(returnCommit['commit'].sha, cluster_details)
 
-        if ifWorkFlowExists and ifChartsExists:
-            print("Pushing pkl file")
-            returnCommit = self.pushPKLFile(repo)
-            self.getWorkflowStatus(returnCommit['commit'].sha, cluster_details)
+        if ifChartsExists and ifWorkFlowExists:
+            commit = self.pushdummyFiles(self.repo)
+            self.getWorkflowStatus(commit['commit'].sha, cluster_details)
 
     def pushGithubSecrets(self, repo):
         repoFullName = repo.owner.login + "/" + repo.name
@@ -68,7 +67,7 @@ class GithubManager():
         pass
 
     def pushCharts(self, repo, acr_details, port=PORT_NUMBER_DEFAULT):
-        files = getHelmCharts(acr_details, port)
+        files = getHelmCharts(acr_details, port, self.repo.name)
         for f in files:
             newFile = f.path
             content = f.content
@@ -155,14 +154,50 @@ class GithubManager():
                         branch="master",
                     )
 
-    def pushPKLFile(self, repo):
+    def pushdummyFiles(self, repo):
         f = open("azdevopsdemo.pkl", "rb")
         data = f.read()
         f.close()
 
+        commit = None
         contents = repo.get_contents("/azdevopsdemo.pkl")
-        # print(type(data))
-        return repo.update_file(path=contents.path, message="updating pkl file", content=data, sha=contents.sha, branch="master")
+        if not str(contents.content) == str(data):
+            commit = repo.update_file(path=contents.path, message="updating pkl file",
+                                      content=data, sha=contents.sha, branch="master")
+            print("pkl file committed")
+            print(commit)
+        else:
+            print("Nothing to commit for pkl file")
+        return commit
+
+    def pushFiles(self, repo):
+        f = open("azdevopsdemo.pkl", "rb")
+        data = f.read()
+        f.close()
+
+        commit = None
+        contents = repo.get_contents("/azdevopsdemo.pkl")
+        if not str(contents.content) == str(data):
+            commit = repo.update_file(path=contents.path, message="updating pkl file",
+                                      content=data, sha=contents.sha, branch="master")
+            print("pkl file committed")
+            print(commit)
+        else:
+            print("Nothing to commit for pkl file")
+
+        remoteNotebookContent = repo.get_contents(
+            "/SampleModelGeneratorScriptCopy.ipynb")
+        localNotebookContent = get_file_content(
+            "SampleModelGeneratorScriptCopy.ipynb")
+        print(localNotebookContent)
+        if not remoteNotebookContent.content == localNotebookContent:
+            commit = repo.update_file(path=remoteNotebookContent.path, message="updating notebook file",
+                                      content=localNotebookContent, sha=remoteNotebookContent.sha, branch="master")
+            print("notebook file committed")
+            print(commit)
+        else:
+            print("Nothing to commit for pkl file")
+        return commit
 
     def commitAppFile(self):
         # get the app path, then scan the file and then update it .
@@ -185,10 +220,11 @@ class GithubManager():
 
         configure_aks_credentials(
             cluster_details['name'], cluster_details['resourceGroup'])
-        deployment_ip, port = get_deployment_IP_port(RELEASE_NAME, "python")
-        print(
-            'Your app is being deployed at: http://{ip}:{port}/hello'.format(ip=deployment_ip, port=port))
-        print(" Checking run status")
+        deployment_ip, port = get_deployment_IP_port(repo.name, "python")
+        deployUrl = 'Your app is being deployed at: http://{ip}:{port}/predict'.format(
+            ip=deployment_ip, port=port)
+        print(json.dumps({"deployUrl": deployUrl}))
+        # print("Checking run status")
         check_run_status, check_run_conclusion = poll_workflow_status(
             repo.name, repo.owner.login, check_run_id, self.patToken)
 
