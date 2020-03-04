@@ -177,14 +177,25 @@ class GithubManager():
         f.close()
 
         commit = None
-        contents = repo.get_contents("/azdevopsdemo.pkl")
-        if not str(contents.content) == str(data):
-            commit = repo.update_file(path=contents.path, message="updating pkl file",
-                                      content=data, sha=contents.sha, branch="master")
-            print("pkl file committed")
-            print(commit)
-        else:
-            print("Nothing to commit for pkl file")
+
+        try:
+            
+            modelUploadScript = open('modelUpload.py')
+            exec(modelUploadScript.read())
+            modelUploadScript.close()
+            print("model uploaded successfully");
+        except:
+            print(" error while uploading a model")
+
+
+        # contents = repo.get_contents("/azdevopsdemo.pkl")
+        # if not str(contents.content) == str(data):
+        #     commit = repo.update_file(path=contents.path, message="updating pkl file",
+        #                               content=data, sha=contents.sha, branch="master")
+        #     print("pkl file committed")
+        #     print(commit)
+        # else:
+        #     print("Nothing to commit for pkl file")
 
         remoteNotebookContent = repo.get_contents(
             "/SampleModelGeneratorScriptCopy.ipynb")
