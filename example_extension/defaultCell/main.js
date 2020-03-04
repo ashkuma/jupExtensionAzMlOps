@@ -149,7 +149,7 @@ define(["base/js/namespace", "base/js/events"], function(Jupyter, events) {
     };
 
     showDeploymentUrl = function(url) {
-        prompt(url);
+        prompt("Your app is being deployed at:",url);
         return;
     };
 

@@ -224,7 +224,7 @@ class GithubManager():
 
         release_name = repo.name.lower()
         deployment_ip, port = get_deployment_IP_port(release_name, "python")
-        deployUrl = 'Your app is being deployed at: http://{ip}:{port}/predict'.format(
+        deployUrl = 'http://{ip}:{port}/predict'.format(
             ip=deployment_ip, port=port)
         print(json.dumps({"deployUrl": deployUrl}))
         # print("Checking run status")
