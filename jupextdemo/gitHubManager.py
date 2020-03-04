@@ -67,7 +67,8 @@ class GithubManager():
         pass
 
     def pushCharts(self, repo, acr_details, port=PORT_NUMBER_DEFAULT):
-        files = getHelmCharts(acr_details, port, self.repo.name)
+        release_name = self.repo.name.lower()
+        files = getHelmCharts(acr_details, port, release_name)
         for f in files:
             newFile = f.path
             content = f.content
@@ -220,7 +221,9 @@ class GithubManager():
 
         configure_aks_credentials(
             cluster_details['name'], cluster_details['resourceGroup'])
-        deployment_ip, port = get_deployment_IP_port(repo.name, "python")
+
+        release_name = repo.name.lower()
+        deployment_ip, port = get_deployment_IP_port(release_name, "python")
         deployUrl = 'Your app is being deployed at: http://{ip}:{port}/predict'.format(
             ip=deployment_ip, port=port)
         print(json.dumps({"deployUrl": deployUrl}))

@@ -33,7 +33,7 @@ class Files:  # pylint: disable=too-few-public-methods
         self.content = content
 
 
-def getHelmCharts(acr_details, port, repo_name):
+def getHelmCharts(acr_details, port, release_name):
     languagePackPath = getLanguagePackPath()
     files = []
     langfilesPaths = testglob(languagePackPath)
@@ -45,7 +45,7 @@ def getHelmCharts(acr_details, port, repo_name):
         file_content = get_file_content(name)
         if "values.yaml" in name:
             file_content = replace_values(
-                repo_name, file_content, acr_details)
+                release_name, file_content, acr_details)
             file_content = replace_port(file_content, port)
         if name.startswith(languagePackPath):
             name = name[len(languagePackPath):]
@@ -55,7 +55,7 @@ def getHelmCharts(acr_details, port, repo_name):
     return files
 
 
-def get_yaml_template_for_repo(cluster_details, acr_details, repo_name):
+def get_yaml_template_for_repo(cluster_details, acr_details, release_name):
     files_to_return = []
     github_workflow_path = '.github/workflows/'
     # Read template file
@@ -64,10 +64,10 @@ def get_yaml_template_for_repo(cluster_details, acr_details, repo_name):
     from resources.resourcefiles import DEPLOY_TO_AKS_TEMPLATE
     files_to_return.append(Files(path=workflow_yaml,
                                  content=DEPLOY_TO_AKS_TEMPLATE
-                                 .replace(APP_NAME_PLACEHOLDER, repo_name)
+                                 .replace(APP_NAME_PLACEHOLDER, release_name)
                                  .replace(ACR_PLACEHOLDER, acr_details['name'])
                                  .replace(CLUSTER_PLACEHOLDER, cluster_details['name'])
-                                 .replace(RELEASE_PLACEHOLDER, repo_name)
+                                 .replace(RELEASE_PLACEHOLDER, release_name)
                                  .replace(RG_PLACEHOLDER, cluster_details['resourceGroup'])))
     return files_to_return
 
